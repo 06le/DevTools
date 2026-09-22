@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CommandTable xmlns="http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <Extern href="stdidcmd.h"/>
+  <Extern href="vsshlids.h"/>
+  <Include href="VSGlobals.vsct"/>
+
+  <Commands package="SmartBookmarks">
+    <Menus>
+      <Menu guid="SmartBookmarks" id="MainMenu" type="Menu" priority="0x0600">
+        <Parent guid="guidSHLMainMenu" id="IDM_VS_MENU_TOOLS"/>
+        <Strings>
+          <ButtonText>Smart Bookmarks</ButtonText>
+          <CommandName>Smart Bookmarks</CommandName>
+        </Strings>
+      </Menu>
+    </Menus>
+    <Groups>
+      <Group guid="SmartBookmarks" id="MenuGroup" priority="0x0100">
+        <Parent guid="SmartBookmarks" id="MainMenu"/>
+      </Group>
+      <Group guid="SmartBookmarks" id="ToggleNumberedGroup" priority="0x0200">
+        <Parent guid="SmartBookmarks" id="MainMenu"/>
+      </Group>
+      <Group guid="SmartBookmarks" id="GoToNumberedGroup" priority="0x0300">
+        <Parent guid="SmartBookmarks" id="MainMenu"/>
+      </Group>
+      <Group guid="SmartBookmarks" id="MiscGroup" priority="0x0400">
+        <Parent guid="SmartBookmarks" id="MainMenu"/>
+      </Group>
+    </Groups>
+    <Buttons>
+      <Button guid="SmartBookmarks" id="ShowToolWindow" priority="0x0100" type="Button">
+        <Parent guid="SmartBookmarks" id="MenuGroup" />
+        <Strings>
+          <ButtonText>Show Smart Bookmarks</ButtonText>
+          <LocCanonicalName>.SmartBookmarks.ShowToolWindow</LocCanonicalName>
+        </Strings>
+      </Button>
+      <Button guid="SmartBookmarks" id="ToggleNormalBookmark" priority="0x0100" type="Button">
+        <Parent guid="SmartBookmarks" id="MiscGroup" />
+        <Strings>
+          <ButtonText>Toggle Normal Bookmark</ButtonText>
+          <LocCanonicalName>.SmartBookmarks.ToggleNormalBookmark</LocCanonicalName>
+        </Strings>
+      </Button>
+      <Button guid="SmartBookmarks" id="ToggleNumberedBookmark0" priority="0x0100" type="Button">
+        <Parent guid="SmartBookmarks" id="ToggleNumberedGroup" />
+        <Strings>
+          <ButtonText>Toggle Numbered Bookmark 0</ButtonText>
+          <LocCanonicalName>.SmartBookmarks.ToggleNumberedBookmark0</LocCanonicalName>
+        </Strings>
+      </Button>
+      <Button guid="SmartBookmarks" id="ToggleNumberedBookmark1" priority="0x0101" type="Button">
+        <Parent guid="SmartBookmarks" id="ToggleNumberedGroup" />
+        <Strings>
+          <ButtonText>Toggle Numbered Bookmark 1</ButtonText>
+          <LocCanonicalName>.SmartBookmarks.ToggleNumberedBookmark1</LocCanonicalName>
+        </Strings>
+      </Button>
+      <Button guid="SmartBookmarks" id="ToggleNumberedBookmark2" priority="0x0102" type="Button">
+        <Parent guid="SmartBookmarks" id="ToggleNumberedGroup" />
+        <Strings>
+          <ButtonText>Toggle Numbered Bookmark 2</ButtonText>
+          <LocCanonicalName>.SmartBookmarks.ToggleNumberedBookmark2</LocCanonicalName>
+        </Strings>
+      </Button>
+      <Button guid="SmartBookmarks" id="ToggleNumberedBookmark3" priority="0x0103" type="Button">
+        <Parent guid="SmartBookmarks" id="ToggleNumberedGroup" />
+        <Strings>
+          <ButtonText>Toggle Numbered Bookmark 3</ButtonText>
+          <LocCanonicalName>.SmartBookmarks.ToggleNumberedBookmark3</LocCanonicalName>
+        </Strings>
+      </Button>
+      <Button guid="SmartBookmarks" id="ToggleNumberedBookmark4" priority="0x0104" type="Button">
+        <Parent guid="SmartBookmarks" id="ToggleNumberedGroup" />
+        <Strings>
+          <ButtonText>Toggle Numbered Bookmark 4</ButtonText>
+          <LocCanonicalName>.SmartBookmarks.ToggleNumberedBookmark4</LocCanonicalName>
+        </Strings>
+      </Button>
+      <Button guid="SmartBookmarks" id="ToggleNumberedBookmark5" priority="0x0105" type="Button">
+        <Parent guid="SmartBookmarks" id="ToggleNumberedGroup" />
+        <Strings>
+          <ButtonText>Toggle Numbered Bookmark 5</ButtonText>
+          <LocCanonicalName>.SmartBookmarks.ToggleNumberedBookmark5</LocCanonicalName>
+        </Strings>
+      </Button>
+      <Button guid="SmartBookmarks" id="ToggleNumberedBookmark6" priority="0x0106" type="Button">
+        <Parent guid="SmartBookmarks" id="ToggleNumberedGroup" />
+        <Strings>
+          <ButtonText>Toggle Numbered Bookmark 6</ButtonText>
+          <LocCanonicalName>.SmartBookmarks.ToggleNumberedBookmark6</LocCanonicalName>
+        </Strings>
+      </Button>
+      <Button guid="SmartBookmarks" id="ToggleNumberedBookmark7" priority="0x0107" type="Button">
+        <Parent guid="SmartBookmarks" id="ToggleNumberedGroup" />
+        <Strings>
+          <ButtonText>Toggle Numbered Bookmark 7</ButtonText>
+          <LocCanonicalName>.SmartBookmarks.ToggleNumberedBookmark7</LocCanonicalName>
+        </Strings>
+      </Button>
+      <Button guid="SmartBookmarks" id="ToggleNumberedBookmark8" priority="0x0108" type="Button">
+        <Parent guid="SmartBookmarks" id="ToggleNumberedGroup" />
+        <Strings>
+          <ButtonText>Toggle Numbered Bookmark 8</ButtonText>
+          <LocCanonicalName>.SmartBookmarks.ToggleNumberedBookmark8</LocCanonicalName>
+        </Strings>
+      </Button>
+      <Button guid="SmartBookmarks" id="ToggleNumberedBookmark9" priority="0x0109" type="Button">
+        <Parent guid="SmartBookmarks" id="ToggleNumberedGroup" />
+        <Strings>
+          <ButtonText>Toggle Numbered Bookmark 9</ButtonText>
+          <LocCanonicalName>.SmartBookmarks.ToggleNumberedBookmark9</LocCanonicalName>
+        </Strings>
+      </Button>
+      <Button guid="SmartBookmarks" id="GoToNumberedBookmark0" priority="0x0200" type="Button">
+        <Parent guid="SmartBookmarks" id="GoToNumberedGroup" />
+        <Strings>
+          <ButtonText>Go To Numbered Bookmark 0</ButtonText>
+          <LocCanonicalName>.SmartBookmarks.GoToNumberedBookmark0</LocCanonicalName>
+        </Strings>
+      </Button>
+      <Button guid="SmartBookmarks" id="GoToNumberedBookmark1" priority="0x0201" type="Button">
+        <Parent guid="SmartBookmarks" id="GoToNumberedGroup" />
+        <Strings>
+          <ButtonText>Go To Numbered Bookmark 1</ButtonText>
+          <LocCanonicalName>.SmartBookmarks.GoToNumberedBookmark1</LocCanonicalName>
+        </Strings>
+      </Button>
+      <Button guid="SmartBookmarks" id="GoToNumberedBookmark2" priority="0x0202" type="Button">
+        <Parent guid="SmartBookmarks" id="GoToNumberedGroup" />
+        <Strings>
+          <ButtonText>Go To Numbered Bookmark 2</ButtonText>
+          <LocCanonicalName>.SmartBookmarks.GoToNumberedBookmark2</LocCanonicalName>
+        </Strings>
+      </Button>
+      <Button guid="SmartBookmarks" id="GoToNumberedBookmark3" priority="0x0203" type="Button">
+        <Parent guid="SmartBookmarks" id="GoToNumberedGroup" />
+        <Strings>
+          <ButtonText>Go To Numbered Bookmark 3</ButtonText>
+          <LocCanonicalName>.SmartBookmarks.GoToNumberedBookmark3</LocCanonicalName>
+        </Strings>
+      </Button>
+      <Button guid="SmartBookmarks" id="GoToNumberedBookmark4" priority="0x0204" type="Button">
+        <Parent guid="SmartBookmarks" id="GoToNumberedGroup" />
+        <Strings>
+          <ButtonText>Go To Numbered Bookmark 4</ButtonText>
+          <LocCanonicalName>.SmartBookmarks.GoToNumberedBookmark4</LocCanonicalName>
+        </Strings>
+      </Button>
+      <Button guid="SmartBookmarks" id="GoToNumberedBookmark5" priority="0x0205" type="Button">
+        <Parent guid="SmartBookmarks" id="GoToNumberedGroup" />
+        <Strings>
+          <ButtonText>Go To Numbered Bookmark 5</ButtonText>
+          <LocCanonicalName>.SmartBookmarks.GoToNumberedBookmark5</LocCanonicalName>
+        </Strings>
+      </Button>
+      <Button guid="SmartBookmarks" id="GoToNumberedBookmark6" priority="0x0206" type="Button">
+        <Parent guid="SmartBookmarks" id="GoToNumberedGroup" />
+        <Strings>
+          <ButtonText>Go To Numbered Bookmark 6</ButtonText>
+          <LocCanonicalName>.SmartBookmarks.GoToNumberedBookmark6</LocCanonicalName>
+        </Strings>
+      </Button>
+      <Button guid="SmartBookmarks" id="GoToNumberedBookmark7" priority="0x0207" type="Button">
+        <Parent guid="SmartBookmarks" id="GoToNumberedGroup" />
+        <Strings>
+          <ButtonText>Go To Numbered Bookmark 7</ButtonText>
+          <LocCanonicalName>.SmartBookmarks.GoToNumberedBookmark7</LocCanonicalName>
+        </Strings>
+      </Button>
+      <Button guid="SmartBookmarks" id="GoToNumberedBookmark8" priority="0x0208" type="Button">
+        <Parent guid="SmartBookmarks" id="GoToNumberedGroup" />
+        <Strings>
+          <ButtonText>Go To Numbered Bookmark 8</ButtonText>
+          <LocCanonicalName>.SmartBookmarks.GoToNumberedBookmark8</LocCanonicalName>
+        </Strings>
+      </Button>
+      <Button guid="SmartBookmarks" id="GoToNumberedBookmark9" priority="0x0209" type="Button">
+        <Parent guid="SmartBookmarks" id="GoToNumberedGroup" />
+        <Strings>
+          <ButtonText>Go To Numbered Bookmark 9</ButtonText>
+          <LocCanonicalName>.SmartBookmarks.GoToNumberedBookmark9</LocCanonicalName>
+        </Strings>
+      </Button>
+    </Buttons>
+  </Commands>
+
+  <Symbols>
+    <GuidSymbol name="SmartBookmarks" value="{541535E1-A0E3-4A81-BCBC-B4377982196F}">
+      <IDSymbol name="MainMenu" value="0x0050" />
+      <IDSymbol name="MenuGroup" value="0x0001" />
+      <IDSymbol name="ToggleNumberedGroup" value="0x0002" />
+      <IDSymbol name="GoToNumberedGroup" value="0x0003" />
+      <IDSymbol name="MiscGroup" value="0x0004" />
+      <IDSymbol name="ToggleNumberedBookmark0" value="0x0100" />
+      <IDSymbol name="ToggleNumberedBookmark1" value="0x0101" />
+      <IDSymbol name="ToggleNumberedBookmark2" value="0x0102" />
+      <IDSymbol name="ToggleNumberedBookmark3" value="0x0103" />
+      <IDSymbol name="ToggleNumberedBookmark4" value="0x0104" />
+      <IDSymbol name="ToggleNumberedBookmark5" value="0x0105" />
+      <IDSymbol name="ToggleNumberedBookmark6" value="0x0106" />
+      <IDSymbol name="ToggleNumberedBookmark7" value="0x0107" />
+      <IDSymbol name="ToggleNumberedBookmark8" value="0x0108" />
+      <IDSymbol name="ToggleNumberedBookmark9" value="0x0109" />
+      <IDSymbol name="GoToNumberedBookmark0" value="0x0200" />
+      <IDSymbol name="GoToNumberedBookmark1" value="0x0201" />
+      <IDSymbol name="GoToNumberedBookmark2" value="0x0202" />
+      <IDSymbol name="GoToNumberedBookmark3" value="0x0203" />
+      <IDSymbol name="GoToNumberedBookmark4" value="0x0204" />
+      <IDSymbol name="GoToNumberedBookmark5" value="0x0205" />
+      <IDSymbol name="GoToNumberedBookmark6" value="0x0206" />
+      <IDSymbol name="GoToNumberedBookmark7" value="0x0207" />
+      <IDSymbol name="GoToNumberedBookmark8" value="0x0208" />
+      <IDSymbol name="GoToNumberedBookmark9" value="0x0209" />
+      <IDSymbol name="ToggleNormalBookmark" value="0x0300" />
+      <IDSymbol name="ShowToolWindow" value="0x0400" />
+    </GuidSymbol>
+  </Symbols>
+</CommandTable>

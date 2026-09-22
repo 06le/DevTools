@@ -1,0 +1,10 @@
+.vs/
+*.user
+*.suo
+*.userosscache
+*.rsuser
+[Bb]in/
+[Oo]bj/
+*.vsix
+*.nupkg
+**/packages/

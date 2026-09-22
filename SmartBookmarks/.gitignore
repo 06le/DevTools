@@ -1,0 +1,7 @@
+.vs/
+*.user
+*.suo
+*.rsuser
+[Bb]in/
+[Oo]bj/
+*.vsix
