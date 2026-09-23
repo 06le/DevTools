@@ -14,23 +14,68 @@ namespace SmartBookmarks.ToolWindows
     {
         private readonly BookmarksViewModel _viewModel = new BookmarksViewModel();
         private BookmarkNode? _contextNode;
+        private bool _rebuilding;
 
         public BookmarksControl()
         {
             InitializeComponent();
             DataContext = _viewModel;
+            IsVisibleChanged += OnIsVisibleChanged;
+            Loaded += OnLoaded;
+        }
+
+        private void OnLoaded(object sender, RoutedEventArgs e)
+        {
+            AttachChanged();
+            RefreshList();
+        }
+
+        private void OnIsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (IsVisible)
+            {
+                AttachChanged();
+                RefreshList();
+            }
+        }
+
+        private void AttachChanged()
+        {
+            BookmarkService.Instance.Changed -= OnBookmarksChanged;
             BookmarkService.Instance.Changed += OnBookmarksChanged;
-            Loaded += (_, __) => _viewModel.Rebuild();
-            Unloaded += (_, __) => BookmarkService.Instance.Changed -= OnBookmarksChanged;
         }
 
         private void OnBookmarksChanged(object sender, EventArgs e)
         {
-            _ = Dispatcher.BeginInvoke(new Action(() => _viewModel.Rebuild()));
+            if (Dispatcher.CheckAccess())
+            {
+                RefreshList();
+                return;
+            }
+
+            _ = Dispatcher.BeginInvoke(new Action(RefreshList));
+        }
+
+        private void RefreshList()
+        {
+            _rebuilding = true;
+            try
+            {
+                _viewModel.Rebuild();
+            }
+            finally
+            {
+                _rebuilding = false;
+            }
         }
 
         private void OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            if (_rebuilding)
+            {
+                return;
+            }
+
             foreach (FolderNode folder in e.AddedItems.OfType<FolderNode>().ToList())
             {
                 NodeList.SelectedItems.Remove(folder);
@@ -163,6 +208,7 @@ namespace SmartBookmarks.ToolWindows
             }
 
             BookmarkService.Instance.RenameBookmark(item.Id, name);
+            RefreshList();
             Persist();
         }
 
@@ -173,6 +219,7 @@ namespace SmartBookmarks.ToolWindows
                 BookmarkService.Instance.Remove(item.Id);
             }
 
+            RefreshList();
             Persist();
         }
 
@@ -182,6 +229,7 @@ namespace SmartBookmarks.ToolWindows
             string? folderId = menuItem.Tag as string;
             int moved = BookmarkService.Instance.MoveToFolder(SelectedBookmarks().Select(b => b.Id), folderId);
             StatusText.Text = moved > 0 ? $"Moved {moved} bookmark(s)" : "No change";
+            RefreshList();
             Persist();
         }
 
@@ -194,6 +242,7 @@ namespace SmartBookmarks.ToolWindows
             }
 
             BookmarkService.Instance.AddFolder(name);
+            RefreshList();
             Persist();
         }
 
@@ -212,6 +261,7 @@ namespace SmartBookmarks.ToolWindows
             }
 
             BookmarkService.Instance.RenameFolder(folder.Id, name);
+            RefreshList();
             Persist();
         }
 
@@ -224,6 +274,7 @@ namespace SmartBookmarks.ToolWindows
             }
 
             BookmarkService.Instance.DeleteFolder(folder.Id);
+            RefreshList();
             Persist();
         }
 
@@ -240,6 +291,7 @@ namespace SmartBookmarks.ToolWindows
             }
 
             BookmarkService.Instance.ClearAll();
+            RefreshList();
             Persist();
         }
 

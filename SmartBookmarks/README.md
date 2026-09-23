@@ -1,124 +1,155 @@
 # Smart Bookmarks
 
-Visual Studio 2022 bookmarks for C++ / Unreal source reading.
+Visual Studio 2022 书签扩展，面向 C++ / Unreal 源码阅读。
 
-- Numbered bookmarks `0~9` (set / overwrite / clear at same tracked position)
-- Unlimited named normal bookmarks
-- One-level folders + Uncategorized
-- Per-solution JSON under `.vs`
-- Open-document tracking so Go To still hits the original line after inserts
-- Glyph in the editor left margin: numbered bookmarks show `0~9`, normal bookmarks show a plain mark
+- 编号书签 `0~9`（同一跟踪位置：设置 / 覆盖 / 清除）
+- 不限数量的普通命名书签
+- 一级文件夹 + 未分类
+- 每个解决方案一份 JSON，存在 `.vs` 下
+- 打开文档期间用跟踪点定位，插入行后「转到」仍落在原代码
+- 编辑器左边距 glyph：编号书签显示 `0~9`，普通书签显示纯标记
 
-First version does **not** bind keyboard shortcuts. Bind them yourself.
+第一版**不绑定**快捷键，需要自己在键盘选项里绑。
 
-## Clone
+## 克隆
 
 ```bat
 git clone https://github.com/06le/DevTools.git D:\DevTools
 ```
 
-This repo is a toolbox. This extension lives in `SmartBookmarks\`.
+本仓库是工具箱。本扩展在 `SmartBookmarks\`。
 
-## Prerequisites
+## 前置条件
 
 - Visual Studio 2022
-- Workload **Visual Studio extension development** (VSSDK)
+- 工作负载 **Visual Studio 扩展开发**（VSSDK）
 
-Without that workload, MSBuild cannot produce a `.vsix`.
+没有该工作负载时，MSBuild 无法产出 `.vsix`。
 
-## Build
+## 编译
 
 ```bat
 "C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\MSBuild.exe" D:\DevTools\SmartBookmarks\SmartBookmarks.sln /p:Configuration=Debug /restore
 ```
 
-Output: `D:\DevTools\SmartBookmarks\src\SmartBookmarks\bin\Debug\SmartBookmarks.vsix`
+产出：`D:\DevTools\SmartBookmarks\src\SmartBookmarks\bin\Debug\SmartBookmarks.vsix`
 
-Command-line build does **not** install into daily Visual Studio.
+命令行编译**不会**安装到日常使用的 Visual Studio。
 
-## Install into daily Visual Studio (any solution)
+扩展版本写在：
 
-F5 only starts an Experimental Instance. To use the extension in XGame / Engine / any other `.sln`:
+`D:\DevTools\SmartBookmarks\src\SmartBookmarks\source.extension.vsixmanifest`
 
-1. Close all Visual Studio windows.
-2. Double-click `D:\DevTools\SmartBookmarks\src\SmartBookmarks\bin\Debug\SmartBookmarks.vsix`  
-   or run:
+这是源码清单。`bin\` / `obj\` 下的 `extension.vsixmanifest` 是编译产物，改那些没用。
+
+## 安装到日常 Visual Studio（任意解决方案）
+
+F5 只会启动实验实例（Exp）。要在 XGame / Engine / 其它 `.sln` 里用：
+
+1. 关掉所有 Visual Studio 窗口（含 F5 拉起的 Exp 实例）。
+2. 双击 `D:\DevTools\SmartBookmarks\src\SmartBookmarks\bin\Debug\SmartBookmarks.vsix`  
+   或执行：
 
 ```bat
 "C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\VSIXInstaller.exe" "D:\DevTools\SmartBookmarks\src\SmartBookmarks\bin\Debug\SmartBookmarks.vsix"
 ```
 
-3. Confirm install for Visual Studio 2022, then open any solution as usual.
-4. Bind keys once: `Tools → Options → Environment → Keyboard`, search `SmartBookmarks`.
+3. 确认安装到 Visual Studio 2022，然后照常打开任意解决方案。
+4. 绑一次快捷键：`工具 → 选项 → 环境 → 键盘`，搜索 `SmartBookmarks`。
 
-Bookmarks are per solution (`{SolutionDir}/.vs/SmartBookmarks/bookmarks.json`). Installing once covers every project; each `.sln` keeps its own list.
+书签按解决方案隔离（`{SolutionDir}/.vs/SmartBookmarks/bookmarks.json`）。装一次即可覆盖所有工程；每个 `.sln` 各自一份列表。
 
-Uninstall: `Extensions → Manage Extensions → Installed → Smart Bookmarks → Uninstall`, then restart VS.
+卸载：`扩展 → 管理扩展 → 已安装 → Smart Bookmarks → 卸载`，然后重启 VS。
 
-## Update
+### 安装器提示「此扩展已安装到所有适用的产品」
 
-After changing source:
+这不是安装失败，是 **同一 Id + 同一版本已经装过**，安装器拒绝覆盖。不必先卸载。把版本号加一档再装，就会直接替换旧版，各解决方案的 `bookmarks.json` 会保留。
 
-1. Close Visual Studio (installer cannot overwrite a loaded extension).
-2. Rebuild with the Build command above.
-3. Run the same `VSIXInstaller.exe` command on the new `.vsix`. Same extension id replaces the old version.
-4. Reopen Visual Studio. Existing per-solution JSON is kept.
+本扩展只声明 VS 2022（Community / Professional / Enterprise，`[17.0,18.0)`）。本机日常 VS 2022 和 F5 的 Exp 实例都会算作适用产品。当前磁盘上的 `.vsix` 若仍是 `0.1.0`，而这两处已经是 `0.1.0`，再双击就会得到这句提示。
 
-If the installer says the extension is in use, VS is still running (including Exp instances from F5).
+一键覆盖安装（关干净 VS 后执行）：
 
-## Debug
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File D:\DevTools\SmartBookmarks\Install-Overwrite.ps1
+```
 
-1. Open `D:\DevTools\SmartBookmarks\SmartBookmarks.sln` in VS2022.
-2. F5 → `devenv.exe /rootsuffix Exp`.
-3. In the **Exp** instance, open a C++ solution.
+脚本会：检查没有 `devenv.exe` → 源码清单版本已经高于已装版本就保持该版本并强制 Rebuild（增量编译可能还打出旧 `.vsix`）→ 源码版本不够高才把补丁号 +1 → 覆盖安装。不要先卸载。强制再加一档版本可加 `-BumpVersion`。
 
-Do not run VSIXInstaller against the default hive.
+手动处理：
 
-## Commands (Tools → Smart Bookmarks)
+1. 打开 `D:\DevTools\SmartBookmarks\src\SmartBookmarks\source.extension.vsixmanifest`，把 `Identity` 的 `Version` 改成 **高于** 已安装版本（例如已装 `0.1.0`，改成 `0.1.1`）。
+2. **重新编译**，让 `bin\Debug\SmartBookmarks.vsix` 带上新版本（只改清单、不重编，双击的仍是旧包）。
+3. 关掉所有 `devenv.exe` 后再跑 VSIXInstaller。
+4. 新版本会替换旧版本，各解决方案下的 `bookmarks.json` 会保留。
 
-Search these in `Tools → Options → Environment → Keyboard`:
+若安装器说扩展正在使用，说明 VS 还在跑（包括 F5 的 Exp 实例）。
 
-| Command | Recommended shortcut |
+查看已装版本：`扩展 → 管理扩展 → 已安装 → Smart Bookmarks`。
+
+## 更新
+
+改完源码后，关掉 Visual Studio，再跑：
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File D:\DevTools\SmartBookmarks\Install-Overwrite.ps1
+```
+
+或手动：先把 `src\SmartBookmarks\source.extension.vsixmanifest` 的 `Version` 加一档，再按上面的编译命令重编，最后对新 `.vsix` 跑同一条 `VSIXInstaller.exe`。相同扩展 Id、更高版本会替换旧版，不必卸载。重新打开 Visual Studio 后，各解决方案已有的 JSON 会保留。
+
+## 调试
+
+1. 用 VS2022 打开 `D:\DevTools\SmartBookmarks\SmartBookmarks.sln`。
+2. F5 → `devenv.exe /rootsuffix Exp`。
+3. 在 **Exp** 实例里打开一个 C++ 解决方案。
+
+F5 装的是 Exp hive，日常 VS 看不到。不要对默认 hive 跑 VSIXInstaller 来调试。
+
+## 命令（工具 → Smart Bookmarks）
+
+在 `工具 → 选项 → 环境 → 键盘` 里搜索这些命令：
+
+| 命令 | 建议快捷键 |
 |---|---|
 | `SmartBookmarks.ToggleNumberedBookmark0` … `9` | `Ctrl+Shift+0` … `9` |
 | `SmartBookmarks.GoToNumberedBookmark0` … `9` | `Alt+0` … `9` |
 | `SmartBookmarks.ToggleNormalBookmark` | `Ctrl+Shift+B` |
-| `SmartBookmarks.ShowToolWindow` | none |
+| `SmartBookmarks.ShowToolWindow` | 不绑 |
 
-`ToggleNumberedBookmarkN` at the current caret:
+`ToggleNumberedBookmarkN` 在当前光标处：
 
-- empty slot → set
-- different location → overwrite
-- same tracked location → clear
+- 空槽 → 设置
+- 不同位置 → 覆盖
+- 同一跟踪位置 → 清除
 
-## Tool Window
+## 工具窗口
 
-`Tools → Smart Bookmarks → Show Smart Bookmarks`
+`工具 → Smart Bookmarks → Show Smart Bookmarks`
 
-- Double-click a bookmark to Go To
-- Ctrl / Shift multi-select
-- Right-click: Go To, Rename, Move to Folder, Delete / Clear
-- Folder right-click: Rename Folder, Delete Folder (bookmarks move to Uncategorized)
-- Clear All asks for confirmation
+- 双击书签转到
+- Ctrl / Shift 多选
+- 右键：转到、重命名、移到文件夹、删除 / 清除
+- 文件夹右键：重命名文件夹、删除文件夹（书签回到未分类）
+- 全部清除会二次确认
+- 列表就地刷新，不必离开工具窗口再回来
 
-No drag-and-drop in v1.
+v1 没有拖放。
 
-## Persistence
+## 持久化
 
 `{SolutionDir}/.vs/SmartBookmarks/bookmarks.json`
 
-Switching solutions saves the old store, clears the window, and loads the new one.
+切换解决方案时会保存旧仓库、清空窗口、再加载新仓库。
 
-## Tracking
+## 跟踪
 
-While a document stays open, Go To uses `ITrackingPoint`, so inserts above the bookmark still land on the original code. The window line number may stay stale until the document is closed (close writes the new line back to JSON). After restart / Git pull, only the stored line is used.
+文档保持打开时，「转到」走 `ITrackingPoint`，书签上方插入行仍会落到原代码。窗口里的行号可能暂时过期，直到关闭文档（关闭时把新行号写回 JSON）。重启 / Git pull 之后只用存储的行号。
 
-## Editor glyphs
+## 编辑器 glyph
 
-The left glyph margin shows a blue mark on bookmarked lines. Numbered bookmarks include the digit; a numbered bookmark wins if both kinds sit on the same line. Glyphs follow live tracking while the file stays open.
+左边距会在书签行显示蓝色标记。编号书签带数字；同一行两种书签并存时，编号优先。文件保持打开期间，glyph 跟随实时跟踪。
 
-## Known limitations
+## 已知限制
 
-- No nested folders, cloud sync, or fuzzy relocation across Git revisions
-- Missing files stay in the list until you Delete / Clear them
-- No default keybindings
+- 没有嵌套文件夹、云同步，也不会跨 Git 修订做模糊重定位
+- 缺失文件会留在列表里，直到你删除 / 清除
+- 没有默认快捷键
