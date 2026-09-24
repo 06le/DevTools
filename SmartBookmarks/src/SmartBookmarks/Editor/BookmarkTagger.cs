@@ -58,6 +58,7 @@ namespace SmartBookmarks.Editor
 
         public IEnumerable<ITagSpan<BookmarkGlyphTag>> GetTags(NormalizedSnapshotSpanCollection spans)
         {
+            EnsureDocument();
             if (_detached || spans.Count == 0 || string.IsNullOrEmpty(_filePath))
             {
                 yield break;
@@ -121,7 +122,46 @@ namespace SmartBookmarks.Editor
             }
         }
 
+        /// <summary>
+        /// tagger 可能在文档与缓冲区关联之前就已创建，此时构造函数拿不到路径。
+        /// 每次取 tag 时补一次，避免该缓冲区始终不显示 glyph。
+        /// </summary>
+        private void EnsureDocument()
+        {
+            if (_detached || !string.IsNullOrEmpty(_filePath))
+            {
+                return;
+            }
+
+            if (_documentFactory.TryGetTextDocument(_buffer, out ITextDocument document))
+            {
+                _document = document;
+                _filePath = LocationHelper.NormalizePath(document.FilePath);
+            }
+        }
+
         private void RaiseAll()
+        {
+            if (_detached)
+            {
+                return;
+            }
+
+            // 书签变更可能来自后台线程，编辑器要求在 UI 线程上通知。
+            if (Microsoft.VisualStudio.Shell.ThreadHelper.JoinableTaskFactory.Context.IsOnMainThread)
+            {
+                RaiseAllCore();
+                return;
+            }
+
+            _ = Microsoft.VisualStudio.Shell.ThreadHelper.JoinableTaskFactory.RunAsync(async () =>
+            {
+                await Microsoft.VisualStudio.Shell.ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+                RaiseAllCore();
+            });
+        }
+
+        private void RaiseAllCore()
         {
             if (_detached)
             {

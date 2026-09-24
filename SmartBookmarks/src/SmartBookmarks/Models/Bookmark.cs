@@ -38,6 +38,12 @@ namespace SmartBookmarks.Models
 
         [DataMember(Name = "lineText")]
         public string LineText { get; set; } = "";
+
+        /// <summary>
+        /// 显式重设位置（覆盖编号书签）时自增。跟踪点按此值判断是否需要重建，
+        /// 避免旧跟踪点继续把 glyph 钉在上一处位置。不持久化。
+        /// </summary>
+        public int PositionRevision { get; set; }
     }
 
     [DataContract]
@@ -61,6 +67,10 @@ namespace SmartBookmarks.Models
 
         [DataMember(Name = "bookmarks")]
         public Bookmark[] Bookmarks { get; set; } = Array.Empty<Bookmark>();
+
+        /// <summary>新建书签默认进入的文件夹；null 表示未分类。</summary>
+        [DataMember(Name = "defaultFolderId")]
+        public string? DefaultFolderId { get; set; }
     }
 
     internal readonly struct CaretLocation

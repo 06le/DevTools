@@ -105,6 +105,7 @@ namespace SmartBookmarks.ToolWindows
             SetItem(menu, "Go To", hasBookmarks);
             SetItem(menu, "Rename", SelectedBookmarks().Count == 1);
             SetItem(menu, "Delete / Clear", hasBookmarks);
+            SetItem(menu, "Set as Default Folder", ContextFolderOrUncategorized() != null && !hasBookmarks);
             SetItem(menu, "Rename Folder", oneFolder);
             SetItem(menu, "Delete Folder", oneFolder);
 
@@ -153,6 +154,12 @@ namespace SmartBookmarks.ToolWindows
             }
 
             return null;
+        }
+
+        /// <summary>右键命中的文件夹节点，含 Uncategorized，用于把默认文件夹设回未分类。</summary>
+        private FolderNode? ContextFolderOrUncategorized()
+        {
+            return _contextNode as FolderNode;
         }
 
         private static T? FindAncestor<T>(DependencyObject? current) where T : DependencyObject
@@ -242,6 +249,23 @@ namespace SmartBookmarks.ToolWindows
             }
 
             BookmarkService.Instance.AddFolder(name);
+            RefreshList();
+            Persist();
+        }
+
+        private void OnSetDefaultFolder(object sender, RoutedEventArgs e)
+        {
+            FolderNode? folder = ContextFolderOrUncategorized();
+            if (folder == null)
+            {
+                return;
+            }
+
+            // Uncategorized 传 null 清除默认；对已是默认的文件夹再点一次同样清除。
+            BookmarkService.Instance.SetDefaultFolder(folder.Id);
+            StatusText.Text = BookmarkService.Instance.DefaultFolderId == null
+                ? "New bookmarks go to Uncategorized"
+                : $"New bookmarks go to \"{folder.Name}\"";
             RefreshList();
             Persist();
         }

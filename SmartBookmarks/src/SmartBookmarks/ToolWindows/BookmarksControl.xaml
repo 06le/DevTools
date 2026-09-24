@@ -7,7 +7,7 @@
              Foreground="{DynamicResource {x:Static vs:VsBrushes.ToolWindowTextKey}}">
     <UserControl.Resources>
         <DataTemplate DataType="{x:Type local:FolderNode}">
-            <TextBlock FontWeight="SemiBold" Margin="2,6,2,2" Text="{Binding Name}" />
+            <TextBlock FontWeight="SemiBold" Margin="2,6,2,2" Text="{Binding Title}" />
         </DataTemplate>
         <DataTemplate DataType="{x:Type local:BookmarkItemNode}">
             <StackPanel Margin="14,1,2,2">
@@ -47,6 +47,7 @@
                     <MenuItem Header="Move to Folder" Name="MoveMenu" />
                     <Separator />
                     <MenuItem Header="Delete / Clear" Click="OnDelete" />
+                    <MenuItem Header="Set as Default Folder" Click="OnSetDefaultFolder" />
                     <MenuItem Header="Rename Folder" Click="OnRenameFolder" />
                     <MenuItem Header="Delete Folder" Click="OnDeleteFolder" />
                 </ContextMenu>

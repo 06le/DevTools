@@ -22,17 +22,23 @@ namespace SmartBookmarks.ToolWindows
 
     public sealed class FolderNode : BookmarkNode
     {
-        public FolderNode(string? id, string name)
+        public FolderNode(string? id, string name, bool isDefault)
         {
             Id = id;
             Name = name;
+            IsDefault = isDefault;
         }
 
         public string? Id { get; }
 
         public string Name { get; }
 
+        /// <summary>是否为新建书签的默认文件夹。</summary>
+        public bool IsDefault { get; }
+
         public bool IsVirtual => Id == null;
+
+        public string Title => IsDefault ? $"{Name}  (default)" : Name;
     }
 
     public sealed class BookmarkItemNode : BookmarkNode
@@ -94,17 +100,18 @@ namespace SmartBookmarks.ToolWindows
                 .OrderBy(f => f.Name, StringComparer.OrdinalIgnoreCase)
                 .ToList();
             List<Bookmark> bookmarks = BookmarkService.Instance.Bookmarks.ToList();
+            string? defaultFolderId = BookmarkService.Instance.DefaultFolderId;
 
-            AddFolder(null, "Uncategorized", bookmarks.Where(b => string.IsNullOrEmpty(b.FolderId)));
+            AddFolder(null, "Uncategorized", bookmarks.Where(b => string.IsNullOrEmpty(b.FolderId)), defaultFolderId);
             foreach (BookmarkFolder folder in folders)
             {
-                AddFolder(folder.Id, folder.Name, bookmarks.Where(b => b.FolderId == folder.Id));
+                AddFolder(folder.Id, folder.Name, bookmarks.Where(b => b.FolderId == folder.Id), defaultFolderId);
             }
         }
 
-        private void AddFolder(string? id, string name, IEnumerable<Bookmark> bookmarks)
+        private void AddFolder(string? id, string name, IEnumerable<Bookmark> bookmarks, string? defaultFolderId)
         {
-            Nodes.Add(new FolderNode(id, name));
+            Nodes.Add(new FolderNode(id, name, id != null && id == defaultFolderId));
             foreach (Bookmark bookmark in bookmarks
                 .OrderBy(b => b.Kind == BookmarkKind.Numbered ? 0 : 1)
                 .ThenBy(b => b.Number ?? int.MaxValue)

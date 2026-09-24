@@ -23,15 +23,15 @@ namespace SmartBookmarks.Commands
                 return;
             }
 
+            // 先让当前文档进入跟踪，已有编号书签的行号才能按实时位置判定。
+            DocumentTrackingService.Instance.AttachView(view);
+
             Bookmark? existing = BookmarkService.Instance.GetNumbered(Number);
             if (existing != null)
             {
-                int line = existing.Line;
-                int column = existing.Column;
-                DocumentTrackingService.Instance.TryGetTrackedPosition(existing, out line, out column);
-                if (LocationHelper.SameFile(existing.FilePath, location.Value.FilePath)
-                    && line == location.Value.Line
-                    && column == location.Value.Column)
+                DocumentTrackingService.Instance.TryGetTrackedPosition(existing, out int line, out _);
+                // 按行判定，不比较列：光标停在该行任意位置都算同一处，再按一次即清除。
+                if (LocationHelper.SameLine(existing.FilePath, line, location.Value))
                 {
                     BookmarkService.Instance.ClearNumbered(Number);
                     await BookmarkService.Instance.SaveCurrentSolutionAsync();

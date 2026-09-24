@@ -16,11 +16,25 @@ namespace SmartBookmarks.Services
 
         private bool _subscribed;
 
+        private sealed class TrackedPoint
+        {
+            public TrackedPoint(ITrackingPoint point, int revision)
+            {
+                Point = point;
+                Revision = revision;
+            }
+
+            public ITrackingPoint Point { get; }
+
+            /// <summary>建立此跟踪点时书签的 PositionRevision，用于判断位置是否已被改写。</summary>
+            public int Revision { get; }
+        }
+
         private sealed class TrackedFile
         {
             public ITextBuffer Buffer { get; set; } = null!;
 
-            public Dictionary<string, ITrackingPoint> Points { get; } = new Dictionary<string, ITrackingPoint>();
+            public Dictionary<string, TrackedPoint> Points { get; } = new Dictionary<string, TrackedPoint>();
         }
 
         internal void Start()
@@ -60,14 +74,20 @@ namespace SmartBookmarks.Services
                 return false;
             }
 
-            if (!file.Points.TryGetValue(bookmark.Id, out ITrackingPoint point))
+            if (!file.Points.TryGetValue(bookmark.Id, out TrackedPoint tracked))
+            {
+                return false;
+            }
+
+            // 位置刚被显式改写、跟踪点还没重建时，用存储位置，避免读到旧行。
+            if (tracked.Revision != bookmark.PositionRevision)
             {
                 return false;
             }
 
             try
             {
-                SnapshotPoint snapshotPoint = point.GetPoint(file.Buffer.CurrentSnapshot);
+                SnapshotPoint snapshotPoint = tracked.Point.GetPoint(file.Buffer.CurrentSnapshot);
                 LocationHelper.FromSnapshotPoint(snapshotPoint, out line, out column);
                 return true;
             }
@@ -101,11 +121,18 @@ namespace SmartBookmarks.Services
                 return;
             }
 
-            foreach (KeyValuePair<string, ITrackingPoint> pair in file.Points)
+            foreach (KeyValuePair<string, TrackedPoint> pair in file.Points)
             {
                 try
                 {
-                    SnapshotPoint snapshotPoint = pair.Value.GetPoint(file.Buffer.CurrentSnapshot);
+                    // 位置已被显式改写而跟踪点尚未重建时不得回写，否则旧行会覆盖新位置。
+                    Bookmark? bookmark = BookmarkService.Instance.FindById(pair.Key);
+                    if (bookmark == null || bookmark.PositionRevision != pair.Value.Revision)
+                    {
+                        continue;
+                    }
+
+                    SnapshotPoint snapshotPoint = pair.Value.Point.GetPoint(file.Buffer.CurrentSnapshot);
                     LocationHelper.FromSnapshotPoint(snapshotPoint, out int line, out int column);
                     BookmarkService.Instance.UpdateStoredPosition(pair.Key, line, column);
                 }
@@ -150,13 +177,17 @@ namespace SmartBookmarks.Services
             ITextSnapshot snapshot = buffer.CurrentSnapshot;
             foreach (Bookmark bookmark in BookmarkService.Instance.Bookmarks.Where(b => live.Contains(b.Id)))
             {
-                if (file.Points.ContainsKey(bookmark.Id))
+                // 已有跟踪点且位置未被改写时保留，继续承担编辑跟随。
+                if (file.Points.TryGetValue(bookmark.Id, out TrackedPoint existing)
+                    && existing.Revision == bookmark.PositionRevision)
                 {
                     continue;
                 }
 
                 int position = LocationHelper.ToSnapshotPosition(snapshot, bookmark.Line, bookmark.Column);
-                file.Points[bookmark.Id] = snapshot.CreateTrackingPoint(position, PointTrackingMode.Positive);
+                file.Points[bookmark.Id] = new TrackedPoint(
+                    snapshot.CreateTrackingPoint(position, PointTrackingMode.Positive),
+                    bookmark.PositionRevision);
             }
         }
 

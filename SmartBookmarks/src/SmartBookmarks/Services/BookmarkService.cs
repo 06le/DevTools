@@ -111,6 +111,7 @@ namespace SmartBookmarks.Services
         private readonly List<BookmarkFolder> _folders = new List<BookmarkFolder>();
         private readonly List<Bookmark> _bookmarks = new List<Bookmark>();
         private readonly PersistenceService _persistence = new PersistenceService();
+        private string? _defaultFolderId;
 
         internal event EventHandler? Changed;
 
@@ -132,6 +133,18 @@ namespace SmartBookmarks.Services
                 lock (_gate)
                 {
                     return _bookmarks.ToList();
+                }
+            }
+        }
+
+        /// <summary>新建书签默认进入的文件夹 Id；null 表示未分类。</summary>
+        internal string? DefaultFolderId
+        {
+            get
+            {
+                lock (_gate)
+                {
+                    return _defaultFolderId;
                 }
             }
         }
@@ -197,6 +210,7 @@ namespace SmartBookmarks.Services
                 _folders.AddRange(store.Folders ?? Array.Empty<BookmarkFolder>());
                 _bookmarks.Clear();
                 _bookmarks.AddRange(Sanitize(store.Bookmarks ?? Array.Empty<Bookmark>()));
+                _defaultFolderId = NormalizeFolderId(store.DefaultFolderId);
             }
 
             RaiseChanged();
@@ -217,7 +231,8 @@ namespace SmartBookmarks.Services
                 {
                     Version = 1,
                     Folders = _folders.ToArray(),
-                    Bookmarks = _bookmarks.ToArray()
+                    Bookmarks = _bookmarks.ToArray(),
+                    DefaultFolderId = _defaultFolderId
                 };
             }
 
@@ -237,6 +252,7 @@ namespace SmartBookmarks.Services
             {
                 _folders.Clear();
                 _bookmarks.Clear();
+                _defaultFolderId = null;
             }
 
             RaiseChanged();
@@ -255,6 +271,9 @@ namespace SmartBookmarks.Services
                     existing.Column = location.Column;
                     existing.DisplayName = location.DisplayName;
                     existing.LineText = location.LineText;
+                    // 位置被显式改写，跟踪点必须按新位置重建，否则 glyph 留在旧行。
+                    existing.PositionRevision++;
+                    // 覆盖已有编号书签不改变它所在的文件夹。
                     result = existing;
                 }
                 else
@@ -267,7 +286,8 @@ namespace SmartBookmarks.Services
                         Line = location.Line,
                         Column = location.Column,
                         DisplayName = location.DisplayName,
-                        LineText = location.LineText
+                        LineText = location.LineText,
+                        FolderId = _defaultFolderId
                     };
                     _bookmarks.Add(result);
                 }
@@ -312,7 +332,8 @@ namespace SmartBookmarks.Services
                     Line = location.Line,
                     Column = location.Column,
                     DisplayName = location.DisplayName,
-                    LineText = location.LineText
+                    LineText = location.LineText,
+                    FolderId = _defaultFolderId
                 };
                 _bookmarks.Add(bookmark);
             }
@@ -415,6 +436,11 @@ namespace SmartBookmarks.Services
                 {
                     bookmark.FolderId = null;
                 }
+
+                if (_defaultFolderId == id)
+                {
+                    _defaultFolderId = null;
+                }
             }
 
             RaiseChanged();
@@ -458,9 +484,36 @@ namespace SmartBookmarks.Services
             {
                 _folders.Clear();
                 _bookmarks.Clear();
+                _defaultFolderId = null;
             }
 
             RaiseChanged();
+        }
+
+        /// <summary>
+        /// 设置新建书签的默认文件夹。传 null 或未知 Id 表示回到未分类；
+        /// 重复设置同一文件夹视为取消，便于右键菜单来回切换。
+        /// </summary>
+        internal bool SetDefaultFolder(string? folderId)
+        {
+            lock (_gate)
+            {
+                string? target = NormalizeFolderId(folderId);
+                if (target != null && _defaultFolderId == target)
+                {
+                    target = null;
+                }
+
+                if (_defaultFolderId == target)
+                {
+                    return false;
+                }
+
+                _defaultFolderId = target;
+            }
+
+            RaiseChanged();
+            return true;
         }
 
         internal void UpdateStoredPosition(string id, int line, int column)
@@ -476,6 +529,17 @@ namespace SmartBookmarks.Services
                 bookmark.Line = line;
                 bookmark.Column = column;
             }
+        }
+
+        /// <summary>把空串和已不存在的文件夹 Id 归一为 null（未分类）。调用方须持有 _gate。</summary>
+        private string? NormalizeFolderId(string? folderId)
+        {
+            if (string.IsNullOrEmpty(folderId))
+            {
+                return null;
+            }
+
+            return _folders.Any(f => f.Id == folderId) ? folderId : null;
         }
 
         private string UniqueFolderName(string name, string? exceptId)

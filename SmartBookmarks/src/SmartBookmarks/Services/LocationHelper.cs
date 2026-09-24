@@ -42,6 +42,15 @@ namespace SmartBookmarks.Services
                 && bookmark.Column == location.Column;
         }
 
+        /// <summary>
+        /// 书签行与目标位置是否同一行。编号书签的设置 / 清除按行判定，
+        /// 不比较列，光标停在行内任意位置都算同一处。
+        /// </summary>
+        internal static bool SameLine(string bookmarkFilePath, int bookmarkLine, CaretLocation location)
+        {
+            return SameFile(bookmarkFilePath, location.FilePath) && bookmarkLine == location.Line;
+        }
+
         internal static CaretLocation? FromView(DocumentView? view)
         {
             if (view?.TextView == null || view.TextBuffer == null || string.IsNullOrWhiteSpace(view.FilePath))
