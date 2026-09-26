@@ -263,6 +263,19 @@ namespace SmartBookmarks.Services
             Bookmark result;
             lock (_gate)
             {
+                // 一行只保留最后设置的编号，避免左侧 glyph 与 ToolWindow 各显示一个。
+                // 行号取实时跟踪位置；未跟踪或跟踪点过期时该方法仍把 line 设为存储行。
+                _bookmarks.RemoveAll(b =>
+                {
+                    if (b.Kind != BookmarkKind.Numbered || b.Number == number)
+                    {
+                        return false;
+                    }
+
+                    DocumentTrackingService.Instance.TryGetTrackedPosition(b, out int line, out _);
+                    return LocationHelper.SameLine(b.FilePath, line, location);
+                });
+
                 Bookmark? existing = _bookmarks.FirstOrDefault(b => b.Kind == BookmarkKind.Numbered && b.Number == number);
                 if (existing != null)
                 {
