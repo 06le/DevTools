@@ -73,7 +73,7 @@ F5 只会启动实验实例（Exp）。要在 XGame / Engine / 其它 `.sln` 里
 powershell -NoProfile -ExecutionPolicy Bypass -File D:\DevTools\SmartBookmarks\Install-Overwrite.ps1
 ```
 
-脚本会：检查没有 `devenv.exe` → 源码清单版本已经高于已装版本就保持该版本并强制 Rebuild（增量编译可能还打出旧 `.vsix`）→ 源码版本不够高才把补丁号 +1 → 覆盖安装。不要先卸载。强制再加一档版本可加 `-BumpVersion`。
+脚本会：检查没有 `devenv.exe` → 源码清单版本已经高于已装版本就保持该版本并强制 Rebuild（增量编译可能还打出旧 `.vsix`）→ 源码版本不够高才把补丁号 +1 → 覆盖安装。不要先卸载。强制再加一档版本可加 `-BumpVersion`。右键“使用 PowerShell 运行”时，结束（含失败）会停住，按回车才关窗口；从已有终端执行则不停。
 
 手动处理：
 

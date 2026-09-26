@@ -243,6 +243,38 @@ function Assert-InstallerSucceeded {
     Write-Host "Installer log OK: $($log.Name)"
 }
 
+function Wait-ManualClose {
+    # 右键“使用 PowerShell 运行”没有 -NoExit，进程结束窗口就消失。
+    # 从已有终端调用时父进程不是 explorer，输出本来就留在那个窗口里，不必再等。
+    $ownWindow = $true
+    try {
+        $parentId = (Get-CimInstance Win32_Process -Filter "ProcessId=$PID").ParentProcessId
+        $parentName = (Get-Process -Id $parentId -ErrorAction SilentlyContinue).ProcessName
+        if ($parentName -and $parentName -ne "explorer") {
+            $ownWindow = $false
+        }
+    }
+    catch {
+        $ownWindow = $true
+    }
+
+    if ($ownWindow) {
+        Write-Host ""
+        try {
+            Read-Host "按回车关闭"
+        }
+        catch {
+        }
+    }
+}
+
+trap {
+    Write-Host ""
+    Write-Host "FAILED: $($_.Exception.Message)" -ForegroundColor Red
+    Wait-ManualClose
+    exit 1
+}
+
 function Find-VsixInstaller {
     $vswhere = Join-Path ${env:ProgramFiles(x86)} "Microsoft Visual Studio\Installer\vswhere.exe"
     if (Test-Path -LiteralPath $vswhere) {
@@ -337,3 +369,4 @@ if ($after -and $after -ne $packedVersion) {
 }
 
 Write-Host "Installed $packedVersion over the previous version. Reopen Visual Studio 2022; per-solution bookmarks.json is kept."
+Wait-ManualClose
